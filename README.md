@@ -193,3 +193,8 @@ The foundation defines only the contracts required across plugin boundaries.
 HMAC-capable implementations may additionally return `hmac_required`,
 `hmac_not_enabled`, `invalid_timestamp`, `invalid_nonce`, `invalid_signature`
 or `replay_detected`.
+
+## Documentation
+
+- [Frequently Asked Questions](docs/faq.md)
+- [Privacy and data processing](PRIVACY.md)
