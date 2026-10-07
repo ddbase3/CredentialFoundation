@@ -1,0 +1,19 @@
+{
+	"manifestVersion": 1,
+	"name": "CredentialFoundation",
+	"namespace": "CredentialFoundation",
+	"version": "4.1.0",
+	"description": "Implementation-neutral credential contracts for API credentials in BASE3.",
+	"license": "GPL-3.0-or-later",
+	"maintainers": [
+		{
+			"name": "Daniel Dahme",
+			"url": "https://www.base3.de",
+			"email": "info@base3.de"
+		}
+	],
+	"repository": "https://github.com/ddbase3/CredentialFoundation",
+	"dependencies": {
+		"Base3Framework": ">=4.10.0"
+	}
+}
