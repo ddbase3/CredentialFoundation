@@ -153,3 +153,13 @@ When selecting a concrete credential implementation, document at least:
 - backup and restore handling for secret-related data
 
 Those items are not implemented by CredentialFoundation itself.
+
+
+## Managed encryption contracts
+
+CredentialFoundation now also declares neutral contracts and DTOs for discovering
+configured encryption targets and retrieving a managed encryption key. It does
+not implement a key store, persist profiles, resolve key sources, log secret
+material or expose a browser administration interface. Actual retention and
+secret processing belong to the KeyHarbor implementation or another selected
+`IEncryptionProfileService` implementation, and to the consuming plugins.

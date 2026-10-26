@@ -1,6 +1,6 @@
 # CredentialFoundation
 
-CredentialFoundation is the implementation-neutral contract plugin for API credentials in BASE3.
+CredentialFoundation is the implementation-neutral contract plugin for API credentials and reusable encryption in BASE3.
 
 It defines the public service, provider and DTO contracts required by credential-store implementations and consumer plugins. It does **not** store keys, discover providers itself, create database tables, render administration pages, schedule jobs or send notifications.
 
@@ -174,7 +174,7 @@ CredentialFoundation intentionally does not define:
 
 * key persistence or database schema
 * token generation or secret hashing
-* encryption keys or secret storage
+* actual encryption key material or secret storage
 * service catalog implementation
 * duplicate-service resolution
 * administration or user displays
@@ -198,3 +198,35 @@ or `replay_detected`.
 
 - [Frequently Asked Questions](docs/faq.md)
 - [Privacy and data processing](PRIVACY.md)
+
+
+## Managed encryption contracts
+
+Encryption profiles are a separate lifecycle from API tokens. The same foundation
+exposes `IEncryptionTargetProvider`, `IEncryptionProfileService`,
+`EncryptionTargetDefinition`, and `EncryptionKeyMaterial`. Consumers use only
+these contracts and do not import KeyHarbor classes.
+
+A classmap-discoverable provider enumerates **configured instances**, not just
+implementation classes. Its target IDs must remain globally stable and distinct.
+A project or host supplies the normal `IEncryptionProfileService` binding.
+For example:
+
+```php
+final class ExampleEncryptionTargets implements IEncryptionTargetProvider {
+	public static function getName(): string { return 'exampleencryptiontargets'; }
+	public function getTargets(): array {
+		return [new EncryptionTargetDefinition('example:document-store', 'Document Store')];
+	}
+}
+```
+
+On new writes, consumers call `getWriteKey($targetId)`; a null result means no
+assignment. With an assignment, failures must stop the write rather than write
+plaintext. Consumers persist the returned versioned method and globally unique
+key ID beside the ciphertext. For reads they call `getReadKey($method, $keyId)`
+to resolve historical keys independently of today's assignments. The provider
+must never assume that removing an assignment means older data no longer exists.
+
+The foundation is not a key vault and cannot assert that historical ciphertext
+has been destroyed. Cryptographic implementations remain under BASE3 `ICrypt`.

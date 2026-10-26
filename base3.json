@@ -2,8 +2,8 @@
 	"manifestVersion": 1,
 	"name": "CredentialFoundation",
 	"namespace": "CredentialFoundation",
-	"version": "4.1.0",
-	"description": "Implementation-neutral credential contracts for API credentials in BASE3.",
+	"version": "4.2.0",
+	"description": "Implementation-neutral API credential and managed encryption contracts for BASE3.",
 	"license": "GPL-3.0-or-later",
 	"maintainers": [
 		{
