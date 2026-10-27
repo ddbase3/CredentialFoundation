@@ -25,7 +25,7 @@ Although the foundation does not persist data, its public DTOs and interfaces ca
 Successful result DTOs can contain:
 
 - a credential identifier
-- a user or owner identifier
+- a user identifier (legacy credentials) or a separate verified service-subject identifier
 - a service identifier
 - an expiration timestamp
 
@@ -88,7 +88,7 @@ A concrete implementation must define how secrets are generated, protected at re
 
 ## Request identity state
 
-`ICredentialAccess` defines a request-oriented identity boundary. An implementation may hold the currently authenticated credential identity between `identifyBearer()` or `identifyHmac()` and a subsequent `authorizeService()` call.
+`ICredentialAccess` defines the pre-existing request-oriented identity boundary. `ICredentialOperationAccess` is an optional extension providing exact-operation grant checks for service subjects. An implementation may hold the currently authenticated credential identity between `identifyBearer()` or `identifyHmac()` and a subsequent `authorizeService()` call.
 
 CredentialFoundation does not provide that stateful implementation. The lifecycle and isolation of this current-request state are the responsibility of the active implementation.
 
@@ -99,6 +99,7 @@ CredentialFoundation does not provide that stateful implementation. The lifecycl
 - technical service id
 - label
 - description
+- declared operation identifiers (exact method names, not stored permissions)
 
 These values are normally technical metadata and are not inherently personal data. A provider should still avoid embedding secrets or user-specific data into service labels or descriptions.
 
@@ -163,3 +164,7 @@ not implement a key store, persist profiles, resolve key sources, log secret
 material or expose a browser administration interface. Actual retention and
 secret processing belong to the KeyHarbor implementation or another selected
 `IEncryptionProfileService` implementation, and to the consuming plugins.
+
+## Service-subject extension
+
+`CredentialSubject` includes a principal type and stable identifier. For a service subject this identifies a technical system and may reveal internal infrastructure naming; it is not inherently anonymous or harmless. It never stores passwords or secrets. The foundation still persists nothing and uses no subprocess or external provider. A service subject must not be mapped to an issuer's `userId` or included in a human session. Service operation grants are technical security metadata and should not be included in logs, public error messages or analytics unless needed for a documented purpose. The host owns retention, deletion and access controls.

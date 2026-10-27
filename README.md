@@ -32,9 +32,13 @@ CredentialFoundation/
 │   ├── CredentialFoundationPlugin.php
 │   ├── Api/
 │   │   ├── IApiCredentialService.php
+│   │   ├── ICredentialAccess.php
+│   │   ├── ICredentialOperationAccess.php
 │   │   └── ICredentialServiceProvider.php
 │   └── Dto/
 │       ├── CredentialAuthenticationResult.php
+│       ├── CredentialIdentityResult.php
+│       ├── CredentialSubject.php
 │       ├── CredentialServiceDefinition.php
 │       └── HmacAuthenticationRequest.php
 └── test/
@@ -112,7 +116,7 @@ The implementation is responsible for:
 * verifying the credential grant for that service
 * performing HMAC timestamp, nonce and signature checks
 
-The credential service does not replace domain authorization. A successful credential result identifies the credential owner and proves the service grant; the endpoint may still apply its own RBAC and domain rules.
+The credential service does not replace domain authorization. For user credentials the owner remains the authenticated user; for technical credentials the subject is a separate service identity, never the issuing administrator. A successful credential grant does not authorize domain resources. The receiving endpoint must call its authoritative `IAuthorizationService` and enforce native resource ACLs.
 
 ### `HmacAuthenticationRequest`
 
@@ -167,6 +171,40 @@ CredentialAuthenticationResult::failure(
 Failure codes are intended for internal handling and diagnostics. Public HTTP endpoints should normally map detailed credential failures to generic authentication or authorization responses instead of revealing credential state.
 
 ---
+
+
+## Technical service credentials (service-identity extension)
+
+`CredentialSubject` identifies the verified principal as `user` or `service`. User principals retain the pre-existing `getUserId()` contract. Service principals carry a stable lower-case service id such as `contourz`, while `getUserId()` is `null`; they cannot establish a human session. `CredentialIdentityResult` and `CredentialAuthenticationResult` expose `getSubject()`, and append an optional subject argument to the existing success factories. The previous calls remain valid.
+
+Service providers declare exact operations in the fourth, optional constructor argument of `CredentialServiceDefinition`:
+
+```php
+new CredentialServiceDefinition(
+    'xrm:entity:data',
+    'XRM Entity Data',
+    'Selected entity operations',
+    ['getEntries', 'getEntry']
+);
+```
+
+The credential API separates identity verification from operation grants. `ICredentialOperationAccess extends ICredentialAccess`; original implementations are unchanged and the new capability is opt-in:
+
+```php
+$identity = $access->identifyHmac($signedRequest);
+if (!$identity->isAuthenticated() || !$identity->getSubject()?->isService()) {
+    // Deny.
+}
+$grant = $access->authorizeOperation('xrm:entity:data', 'getEntries');
+if (!$grant->isAuthenticated()) {
+    // Deny.
+}
+// Additionally authorize the actual resource and action through IAuthorizationService.
+```
+
+`ICredentialAccess::authorizeService()` intentionally **denies** a technical service principal without an exact operation; `ICredentialOperationAccess::authorizeOperation()` performs the method-grant check; legacy user-owned service grants still behave as before. Technical credentials must be HMAC-only. Merely identifying a service does not grant a method, privileged group, or resource permission. The current code does not yet install a service-principal mapping into XRM or any other host.
+
+**Integration boundary:** The project plugin (for XRM, `Base3XrmWebsitePlugin`) selects the authentication method. A service endpoint must require the exact operation grant and separately call the host's `IAuthorizationService` and resource-owning native ACL.
 
 ## 3. Architectural boundaries
 

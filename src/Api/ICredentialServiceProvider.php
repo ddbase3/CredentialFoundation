@@ -15,7 +15,8 @@ use CredentialFoundation\Dto\CredentialServiceDefinition;
 interface ICredentialServiceProvider extends IBase {
 
 	/**
-	 * @return array<int,CredentialServiceDefinition>
+	 * @return array<int,CredentialServiceDefinition> Services and callable operation ids owned by this provider.
+	 * Invariant: names are stable and globally unique per service id.
 	 */
 	public function getServices(): array;
 }

@@ -25,19 +25,23 @@ final class CredentialIdentityResult {
 		private readonly string $failureCode,
 		private readonly string $credentialId,
 		private readonly int|string|null $userId,
-		private readonly ?int $expiresAt
+		private readonly ?int $expiresAt,
+		private readonly ?CredentialSubject $subject
 	) {}
 
 	public static function success(
 		string $credentialId,
 		int|string|null $userId,
-		?int $expiresAt = null
+		?int $expiresAt = null,
+		?CredentialSubject $subject = null
 	): self {
 		if (trim($credentialId) === '') {
 			throw new InvalidArgumentException('Authenticated credential ids must not be empty.');
 		}
 
-		return new self(true, '', $credentialId, $userId, $expiresAt);
+		$subject ??= $userId !== null ? new CredentialSubject(CredentialSubject::TYPE_USER, (string)$userId) : null;
+		self::assertSubject($subject, $userId);
+		return new self(true, '', $credentialId, $userId, $expiresAt, $subject);
 	}
 
 	public static function failure(string $failureCode): self {
@@ -45,7 +49,7 @@ final class CredentialIdentityResult {
 			throw new InvalidArgumentException('Credential identity failure codes must not be empty.');
 		}
 
-		return new self(false, $failureCode, '', null, null);
+		return new self(false, $failureCode, '', null, null, null);
 	}
 
 	public function isAuthenticated(): bool {
@@ -58,6 +62,23 @@ final class CredentialIdentityResult {
 
 	public function getCredentialId(): string {
 		return $this->credentialId;
+	}
+
+	/** Authenticated principal; null on failure or for historical null-user results. */
+	public function getSubject(): ?CredentialSubject {
+		return $this->subject;
+	}
+
+	private static function assertSubject(?CredentialSubject $subject, int|string|null $userId): void {
+		if ($subject === null) {
+			return;
+		}
+		if ($subject->isService() && $userId !== null) {
+			throw new InvalidArgumentException('A service subject must never impersonate a user.');
+		}
+		if ($subject->isUser() && (string)$userId !== $subject->getId()) {
+			throw new InvalidArgumentException('The authenticated user must match the user subject.');
+		}
 	}
 
 	public function getUserId(): int|string|null {
@@ -77,6 +98,7 @@ final class CredentialIdentityResult {
 			'failure_code' => $this->failureCode,
 			'credential_id' => $this->credentialId,
 			'user_id' => $this->userId,
+			'subject' => $this->subject?->toArray(),
 			'expires_at' => $this->expiresAt
 		];
 	}

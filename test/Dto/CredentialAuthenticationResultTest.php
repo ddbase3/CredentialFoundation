@@ -23,6 +23,15 @@ final class CredentialAuthenticationResultTest extends TestCase {
 		$this->assertSame(2000000000, $result->getExpiresAt());
 	}
 
+	public function testServiceAuthenticationCannotImpersonateAUser(): void {
+		$subject = new \CredentialFoundation\Dto\CredentialSubject('service', 'contourz');
+		$result = CredentialAuthenticationResult::success('credential-id', null, 'memora:entries', null, $subject);
+		self::assertTrue($result->isAuthenticated());
+		self::assertNull($result->getUserId());
+		self::assertSame('contourz', $result->getSubject()->getId());
+		self::assertSame('service', $result->toArray()['subject']['type']);
+	}
+
 	public function testCreatesRejectedResultWithoutIdentityData(): void {
 		$result = CredentialAuthenticationResult::failure(
 			CredentialAuthenticationResult::FAILURE_EXPIRED,

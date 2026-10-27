@@ -21,6 +21,12 @@ final class CredentialServiceDefinitionTest extends TestCase {
 		$this->assertSame('missionbay:mcp:internal', $definition->toArray()['service_id']);
 	}
 
+	public function testDefinesExactOperationCatalog(): void {
+		$definition = new CredentialServiceDefinition('memora:entries', 'Memora', '', ['getEntry', 'getEntries', 'getEntry']);
+		self::assertSame(['getEntries', 'getEntry'], $definition->getOperations());
+		self::assertSame(['getEntries', 'getEntry'], $definition->toArray()['operations']);
+	}
+
 	public function testRejectsUppercaseServiceId(): void {
 		$this->expectException(InvalidArgumentException::class);
 		new CredentialServiceDefinition('MissionBay:MCP', 'MissionBay MCP');

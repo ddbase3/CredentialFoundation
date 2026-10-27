@@ -3,11 +3,17 @@
 namespace CredentialFoundation\Test\Api;
 
 use CredentialFoundation\Api\IApiCredentialService;
+use CredentialFoundation\Api\ICredentialOperationAccess;
+use CredentialFoundation\Api\ICredentialAccess;
 use CredentialFoundation\Dto\CredentialAuthenticationResult;
 use CredentialFoundation\Dto\HmacAuthenticationRequest;
 use PHPUnit\Framework\TestCase;
 
 final class ApiCredentialServiceContractTest extends TestCase {
+
+	public function testNewOperationCapabilityExtendsUnchangedAccessInterface(): void {
+		self::assertTrue(is_subclass_of(ICredentialOperationAccess::class, ICredentialAccess::class));
+	}
 
 	public function testBearerAndHmacChecksUseTheSameResultContract(): void {
 		$service = new class implements IApiCredentialService {
