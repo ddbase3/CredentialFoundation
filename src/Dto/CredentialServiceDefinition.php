@@ -15,11 +15,15 @@ final class CredentialServiceDefinition {
 	/** @var array<int,string> */
 	private readonly array $operations;
 
+	/** @var array<string,array<int,string>> */
+	private readonly array $resourceAttributes;
+
 	public function __construct(
 		private readonly string $serviceId,
 		private readonly string $label,
 		private readonly string $description = '',
-		array $operations = []
+		array $operations = [],
+		array $resourceAttributes = []
 	) {
 		if (!preg_match(self::ID_PATTERN, $this->serviceId)) {
 			throw new InvalidArgumentException(
@@ -40,6 +44,30 @@ final class CredentialServiceDefinition {
 		$operations = array_keys($normalized);
 		sort($operations, SORT_STRING);
 		$this->operations = $operations;
+
+		$allowedOperators = ['eq', 'ne', 'has', 'not_has', 'in', 'not_in'];
+		$attributes = [];
+		foreach ($resourceAttributes as $attribute => $operators) {
+			if (!is_string($attribute) || !preg_match('/^[a-z][a-z0-9_]*$/', $attribute) || !is_array($operators) || $operators === []) {
+				throw new InvalidArgumentException('Invalid resource attribute declaration.');
+			}
+			$unique = [];
+			foreach ($operators as $operator) {
+				if (!is_string($operator) || !in_array($operator, $allowedOperators, true)) {
+					throw new InvalidArgumentException('Invalid resource operator declaration.');
+				}
+				$unique[$operator] = true;
+			}
+			$attributes[$attribute] = array_keys($unique);
+			sort($attributes[$attribute], SORT_STRING);
+		}
+		ksort($attributes, SORT_STRING);
+		$this->resourceAttributes = $attributes;
+	}
+
+	/** Declared resource attributes and operators; empty means no resource predicates are supported. */
+	public function getResourceAttributes(): array {
+		return $this->resourceAttributes;
 	}
 
 	public function getServiceId(): string {
@@ -67,7 +95,8 @@ final class CredentialServiceDefinition {
 			'service_id' => $this->serviceId,
 			'label' => $this->label,
 			'description' => $this->description,
-			'operations' => $this->operations
+			'operations' => $this->operations,
+			'resource_attributes' => $this->resourceAttributes
 		];
 	}
 }
