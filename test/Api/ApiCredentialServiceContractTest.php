@@ -16,25 +16,7 @@ final class ApiCredentialServiceContractTest extends TestCase {
 	}
 
 	public function testBearerAndHmacChecksUseTheSameResultContract(): void {
-		$service = new class implements IApiCredentialService {
-
-			public function authenticateBearer(
-				string $token,
-				string $serviceId
-			): CredentialAuthenticationResult {
-				return CredentialAuthenticationResult::success('public-id', 42, $serviceId);
-			}
-
-			public function authenticateHmac(
-				HmacAuthenticationRequest $request,
-				string $serviceId
-			): CredentialAuthenticationResult {
-				return CredentialAuthenticationResult::failure(
-					CredentialAuthenticationResult::FAILURE_INVALID_SIGNATURE,
-					$serviceId
-				);
-			}
-		};
+		$service = new ApiCredentialServiceContractTestDouble1();
 
 		$bearer = $service->authenticateBearer('token', 'demo:report');
 		$hmac = $service->authenticateHmac(
@@ -55,3 +37,5 @@ final class ApiCredentialServiceContractTest extends TestCase {
 		$this->assertSame('demo:report', $hmac->getServiceId());
 	}
 }
+
+require_once __DIR__ . '/ApiCredentialServiceContractTestDouble1.php';
