@@ -2,7 +2,7 @@
 
 CredentialFoundation is the implementation-neutral contract plugin for API credentials and reusable encryption in BASE3.
 
-It defines the public service, provider and DTO contracts required by credential-store implementations and consumer plugins. It does **not** store keys, discover providers itself, create database tables, render administration pages, schedule jobs or send notifications.
+It defines the public service, provider and DTO contracts required by credential-store implementations and consumer plugins. It also provides the shared, stateless `Security\HmacRequestSigner` for both clients and servers. It does **not** store keys, discover providers itself, create database tables, render administration pages, schedule jobs or send notifications.
 
 A concrete implementation is expected to be provided by a separate plugin such as `KeyHarbor`.
 
@@ -35,6 +35,8 @@ CredentialFoundation/
 │   │   ├── ICredentialAccess.php
 │   │   ├── ICredentialOperationAccess.php
 │   │   └── ICredentialServiceProvider.php
+│   ├── Security/
+│   │   └── HmacRequestSigner.php
 │   └── Dto/
 │       ├── CredentialAuthenticationResult.php
 │       ├── CredentialIdentityResult.php
@@ -224,7 +226,7 @@ CredentialFoundation intentionally does not define:
 
 Those decisions belong to the implementation plugin and the final project composition.
 
-The foundation defines only the contracts required across plugin boundaries.
+The foundation defines shared contracts and the stateless HMAC signing primitive required across plugin boundaries.
 
 ## HMAC result codes
 
@@ -268,3 +270,7 @@ must never assume that removing an assignment means older data no longer exists.
 
 The foundation is not a key vault and cannot assert that historical ciphertext
 has been destroyed. Cryptographic implementations remain under BASE3 `ICrypt`.
+
+## Shared HMAC request signing
+
+`CredentialFoundation\Security\HmacRequestSigner` owns KeyHarbor request canonicalization and HMAC-SHA-256 signing/verification. Both outbound KeyHarbor clients and server-side KeyHarbor should use this same class. It accepts `HmacAuthenticationRequest` and performs no persistence, networking or logging. During creation of a request signature, the request DTO can contain a nonempty placeholder signature because `sign()` does not consume the DTO signature field.

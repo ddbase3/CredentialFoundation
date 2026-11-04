@@ -1,6 +1,6 @@
 # CredentialFoundation Privacy and Data Processing
 
-This document describes the data-processing boundary of CredentialFoundation itself. CredentialFoundation is an implementation-neutral contract plugin. It defines interfaces and DTOs but does not provide a credential store, HTTP endpoint, persistence backend, logging backend, message transport, or administration interface.
+This document describes the data-processing boundary of CredentialFoundation itself. CredentialFoundation is an implementation-neutral contract plugin. It defines interfaces, DTOs and a stateless HMAC request signer but does not provide a credential store, HTTP endpoint, persistence backend, logging backend, message transport, or administration interface.
 
 This document is technical documentation and is not a legal privacy notice.
 
@@ -168,3 +168,7 @@ secret processing belong to the KeyHarbor implementation or another selected
 ## Service-subject extension
 
 `CredentialSubject` includes a principal type and stable identifier. For a service subject this identifies a technical system and may reveal internal infrastructure naming; it is not inherently anonymous or harmless. It never stores passwords or secrets. The foundation still persists nothing and uses no subprocess or external provider. A service subject must not be mapped to an issuer's `userId` or included in a human session. Service operation grants are technical security metadata and should not be included in logs, public error messages or analytics unless needed for a documented purpose. The host owns retention, deletion and access controls.
+
+## Stateless HMAC signing
+
+`Security/HmacRequestSigner.php` computes canonical request strings, HMAC-SHA-256 signatures and constant-time signature verification using caller-supplied material. The secret, token and raw body remain in memory for the duration of the call. This helper creates no log, network request or storage; the caller and credential backend own their own transport, retention and access policies.
