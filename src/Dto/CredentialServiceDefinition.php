@@ -9,8 +9,8 @@ use InvalidArgumentException;
  */
 final class CredentialServiceDefinition {
 
-	private const ID_PATTERN = '/^[a-z0-9][a-z0-9._:-]*$/';
-	private const OPERATION_PATTERN = '/^[A-Za-z_][A-Za-z0-9_]*$/';
+	private const ID_PATTERN = '/^[a-z0-9][a-z0-9._:-]*$/D';
+	private const OPERATION_PATTERN = '/^[A-Za-z_][A-Za-z0-9_]*$/D';
 
 	/** @var array<int,string> */
 	private readonly array $operations;
@@ -48,7 +48,7 @@ final class CredentialServiceDefinition {
 		$allowedOperators = ['eq', 'ne', 'has', 'not_has', 'in', 'not_in'];
 		$attributes = [];
 		foreach ($resourceAttributes as $attribute => $operators) {
-			if (!is_string($attribute) || !preg_match('/^[a-z][a-z0-9_]*$/', $attribute) || !is_array($operators) || $operators === []) {
+			if (!is_string($attribute) || !preg_match('/^[a-z][a-z0-9_]*$/D', $attribute) || !is_array($operators) || $operators === []) {
 				throw new InvalidArgumentException('Invalid resource attribute declaration.');
 			}
 			$unique = [];
