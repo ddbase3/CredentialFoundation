@@ -81,6 +81,12 @@ final class CredentialIdentityResult {
 		}
 	}
 
+	/**
+	 * The credential subject's native host User::$id, not User::$userid/login
+	 * and not IAccesscontrol::getUserId() where the host uses login identifiers.
+	 * A service subject has no user ID. This value is not a session identity.
+	 * @return int|string|null Verified native user ID, or null.
+	 */
 	public function getUserId(): int|string|null {
 		return $this->userId;
 	}

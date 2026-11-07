@@ -15,8 +15,21 @@ use CredentialFoundation\Dto\CredentialServiceDefinition;
 interface ICredentialServiceProvider extends IBase {
 
 	/**
-	 * @return array<int,CredentialServiceDefinition> Services and callable operation ids owned by this provider.
-	 * Invariant: names are stable and globally unique per service id.
+	 * Describes the logical services controlled by this provider.
+	 *
+	 * Every returned service id MUST be stable and unique in the final classmap
+	 * composition. Operations MUST be explicit stable identifiers, not dynamic
+	 * permissions inferred from incoming HTTP requests. A service MAY attach
+	 * optional CredentialHttpEndpointDefinition metadata for its owning host to
+	 * enforce. The provider MUST NOT authenticate callers or authorize resources.
+	 * An endpoint declaration never publishes a route or grants access by itself.
+	 *
+	 * @return array<int,CredentialServiceDefinition> Complete service descriptions;
+	 *         an empty array is valid when the provider exposes no services.
+	 * @throws \InvalidArgumentException If any service metadata is malformed.
+	 * @throws \UnexpectedValueException If configuration cannot supply valid,
+	 *         unambiguous service metadata.
+	 * Side effects: none beyond reading existing configuration or translations.
 	 */
 	public function getServices(): array;
 }

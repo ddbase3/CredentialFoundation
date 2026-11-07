@@ -10,6 +10,9 @@ use InvalidArgumentException;
  * A type/id pair is not a grant and cannot authenticate itself. Service subjects
  * must never be interpreted as user ids. A subject becomes trusted only when
  * returned by a credential implementation after verifying its persisted key.
+ * TYPE_USER subject ids identify native host User::$id, not account login names
+ * (User::$userid) and not a service subject. A host authentication login must
+ * be resolved from this native id against its authoritative user manager.
  */
 final class CredentialSubject {
 

@@ -172,3 +172,32 @@ secret processing belong to the KeyHarbor implementation or another selected
 ## Stateless HMAC signing
 
 `Security/HmacRequestSigner.php` computes canonical request strings, HMAC-SHA-256 signatures and constant-time signature verification using caller-supplied material. The secret, token and raw body remain in memory for the duration of the call. This helper creates no log, network request or storage; the caller and credential backend own their own transport, retention and access policies.
+
+## Optional HTTP publication metadata (2026-11-07)
+
+`CredentialHttpEndpointDefinition` introduces metadata for the public HTTP
+method, route path, operation identifier or operation parameter and whether a
+credential or a technical credential is required. This metadata has no token,
+secret, principal identity, raw request body or query value. The existing
+`CredentialServiceDefinition` can include this metadata in `toArray()` for
+catalog UIs and integration diagnostics. CredentialFoundation remains a
+stateless contract package and introduces no HTTP handler, network traffic,
+additional persistence, log, new recipient or independent retention schedule.
+Whether an implementation records requests or reveals personally identifiable
+content is determined by its active transport and deployment, not this DTO.
+
+
+## Identity semantics and HTTP request examples (2026-11-07)
+
+The existing `getUserId()` fields in credential result DTOs refer to the
+native host user primary key (`User::$id`). They do not assert that the active
+host accesscontrol session uses the same identifier. For example, XRM uses the
+current login (`User::$userid`) as its session authentication key; mapping
+requires a native `IUsermanager::getUserById()` lookup in the host integration.
+This contract plugin performs no lookup, persistence or logging itself.
+
+`CredentialHttpEndpointDefinition` can also carry an optional example JSON
+request body as public provider metadata. It is serialized for the existing
+credential catalog and displayed by the owning KeyHarbor UI; examples must
+contain neither real user data nor credentials. The foundation itself sends
+no HTTP requests, retains no examples or secrets and creates no logs.

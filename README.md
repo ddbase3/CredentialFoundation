@@ -274,3 +274,63 @@ has been destroyed. Cryptographic implementations remain under BASE3 `ICrypt`.
 ## Shared HMAC request signing
 
 `CredentialFoundation\Security\HmacRequestSigner` owns KeyHarbor request canonicalization and HMAC-SHA-256 signing/verification. Both outbound KeyHarbor clients and server-side KeyHarbor should use this same class. It accepts `HmacAuthenticationRequest` and performs no persistence, networking or logging. During creation of a request signature, the request DTO can contain a nonempty placeholder signature because `sign()` does not consume the DTO signature field.
+
+## Optional HTTP endpoint metadata for credential services
+
+`CredentialServiceDefinition` accepts one additional optional final constructor
+argument, `array $httpEndpoints = []`, and exposes it with `getHttpEndpoints()`.
+Existing provider constructors, API interfaces and grant semantics are unchanged.
+Each item must be a `CredentialHttpEndpointDefinition` describing a concrete
+HTTP method, an absolute request path and either a fixed declared operation or
+a request parameter whose value is one of that service's declared operations.
+
+Example:
+
+```php
+new CredentialServiceDefinition(
+    'example:report',
+    'Report API',
+    'An explicitly grantable report.',
+    ['read'],
+    [],
+    [new CredentialHttpEndpointDefinition('POST', '/report.json', 'read', null, true)]
+);
+```
+
+The final argument is optional to preserve compatibility with all previously
+installed service definitions. Legacy `toArray()` output remains unchanged when
+no HTTP endpoint is provided. `http_endpoints` metadata is present only when
+endpoints have been declared.
+
+**Security:** Endpoint metadata is inert until the owning host's HTTP security
+boundary reads and enforces it. It does not expose routes, authenticate users,
+authorize resources, or grant credentials by itself. The host must identify the
+actual credential subject, verify the exact service grant for a human token or
+an explicit operation grant for a technical subject, and enforce the owning
+resource's normal authorization rules. Unknown and ambiguous combinations must
+not grant access. A technical subject is never converted into a person.
+
+`credentialRequired=true` restricts the endpoint to verified credentials even
+when a normal browser session exists. `technicalOnly=true` requires a verified
+technical HMAC identity. These flags protect published endpoints; they do not
+change the behavior of previously declared services without HTTP metadata.
+
+
+### Public request examples and identity semantics
+
+An endpoint may additionally supply the optional final
+`array $exampleJsonBody = []` parameter to `CredentialHttpEndpointDefinition`.
+KeyHarbor can display this example next to the method and actual site URL in
+its personal credential editor. The owner must use placeholders, never
+live tokens, secrets or personal data. Example bodies are documentation only.
+Legacy endpoints without an example retain their original serialized shape.
+
+`CredentialIdentityResult::getUserId()`,
+`CredentialAuthenticationResult::getUserId()` and user-type
+`CredentialSubject::getId()` refer to the credential owner's native
+`User::$id` in the issuing host. They are **not** automatically the
+`IAccesscontrol::getUserId()` value. In Base3System/XRM the latter represents
+the exact login `User::$userid`. Credential authentication must resolve the
+native ID against the current host usermanager before establishing the host
+session principal. No numeric-text fallback or historic credential login
+snapshot may substitute for that verified mapping.

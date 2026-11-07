@@ -18,12 +18,16 @@ final class CredentialServiceDefinition {
 	/** @var array<string,array<int,string>> */
 	private readonly array $resourceAttributes;
 
+	/** @var array<int,CredentialHttpEndpointDefinition> */
+	private readonly array $httpEndpoints;
+
 	public function __construct(
 		private readonly string $serviceId,
 		private readonly string $label,
 		private readonly string $description = '',
 		array $operations = [],
-		array $resourceAttributes = []
+		array $resourceAttributes = [],
+		array $httpEndpoints = []
 	) {
 		if (!preg_match(self::ID_PATTERN, $this->serviceId)) {
 			throw new InvalidArgumentException(
@@ -63,6 +67,24 @@ final class CredentialServiceDefinition {
 		}
 		ksort($attributes, SORT_STRING);
 		$this->resourceAttributes = $attributes;
+
+		$endpoints = [];
+		foreach ($httpEndpoints as $endpoint) {
+			if (!$endpoint instanceof CredentialHttpEndpointDefinition) {
+				throw new InvalidArgumentException('Invalid credential HTTP endpoint definition.');
+			}
+			$operation = $endpoint->getOperation();
+			if (($operation !== null && !in_array($operation, $this->operations, true)) ||
+				($endpoint->getOperationParameter() !== null && $this->operations === [])) {
+				throw new InvalidArgumentException('Credential HTTP endpoint operation must be declared by the service.');
+			}
+			$key = $endpoint->getMethod() . ' ' . $endpoint->getPath();
+			if (isset($endpoints[$key])) {
+				throw new InvalidArgumentException('Duplicate credential HTTP endpoint declaration.');
+			}
+			$endpoints[$key] = $endpoint;
+		}
+		$this->httpEndpoints = array_values($endpoints);
 	}
 
 	/** Declared resource attributes and operators; empty means no resource predicates are supported. */
@@ -87,16 +109,23 @@ final class CredentialServiceDefinition {
 		return $this->operations;
 	}
 
-	/**
-	 * @return array<string,mixed>
-	 */
+	/** @return array<int,CredentialHttpEndpointDefinition> HTTP entry points owned by this service. */
+	public function getHttpEndpoints(): array {
+		return $this->httpEndpoints;
+	}
+
+	/** @return array<string,mixed> */
 	public function toArray(): array {
-		return [
+		$data = [
 			'service_id' => $this->serviceId,
 			'label' => $this->label,
 			'description' => $this->description,
 			'operations' => $this->operations,
 			'resource_attributes' => $this->resourceAttributes
 		];
+		if ($this->httpEndpoints !== []) {
+			$data['http_endpoints'] = array_map(static fn(CredentialHttpEndpointDefinition $endpoint): array => $endpoint->toArray(), $this->httpEndpoints);
+		}
+		return $data;
 	}
 }
