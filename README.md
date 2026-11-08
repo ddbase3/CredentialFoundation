@@ -334,3 +334,11 @@ the exact login `User::$userid`. Credential authentication must resolve the
 native ID against the current host usermanager before establishing the host
 session principal. No numeric-text fallback or historic credential login
 snapshot may substitute for that verified mapping.
+
+## HTTP service publication and cross-origin browser integration
+
+The detailed contract and operational reference is available in
+[HTTP service and CORS documentation](docs/http-service-publication-and-cors.md).
+The current XRM project handles CORS at the host HTTP transport boundary,
+using the existing KeyHarbor service catalog. The plugin itself introduces
+no alternate CORS service, authorization engine or credential state store.

@@ -201,3 +201,16 @@ request body as public provider metadata. It is serialized for the existing
 credential catalog and displayed by the owning KeyHarbor UI; examples must
 contain neither real user data nor credentials. The foundation itself sends
 no HTTP requests, retains no examples or secrets and creates no logs.
+
+## Host-provided CORS for credential-protected HTTP services (2026-11-08)
+
+`CredentialHttpEndpointDefinition` provides public method/path and operation
+metadata. CredentialFoundation neither inspects browser Origin headers nor
+emits CORS response headers, starts sessions, persists Origin lists or grants
+access to credentials. The XRM host may read this metadata through the existing
+KeyHarbor service catalog to negotiate CORS for an explicitly configured
+Origin. No new token, user mapping, credential store or external recipient is
+created by this contract. Operators must separately assess any approved web
+client as a recipient of responses it is already authorized to read and verify
+actual HTTP request logging/retention. See
+`docs/http-service-publication-and-cors.md` for the ownership boundary.
