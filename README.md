@@ -273,7 +273,7 @@ has been destroyed. Cryptographic implementations remain under BASE3 `ICrypt`.
 
 ## Shared HMAC request signing
 
-`CredentialFoundation\Security\HmacRequestSigner` owns KeyHarbor request canonicalization and HMAC-SHA-256 signing/verification. Both outbound KeyHarbor clients and server-side KeyHarbor should use this same class. It accepts `HmacAuthenticationRequest` and performs no persistence, networking or logging. During creation of a request signature, the request DTO can contain a nonempty placeholder signature because `sign()` does not consume the DTO signature field.
+`Base3\CredentialFoundation\Security\HmacRequestSigner` owns KeyHarbor request canonicalization and HMAC-SHA-256 signing/verification. Both outbound KeyHarbor clients and server-side KeyHarbor should use this same class. It accepts `HmacAuthenticationRequest` and performs no persistence, networking or logging. During creation of a request signature, the request DTO can contain a nonempty placeholder signature because `sign()` does not consume the DTO signature field.
 
 ## Optional HTTP endpoint metadata for credential services
 

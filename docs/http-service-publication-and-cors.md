@@ -129,7 +129,7 @@ A server must continue authenticating and authorizing the **actual request** eve
 
 ## 7. Host-side CORS contract for published services
 
-The implementation belongs at the owning host's HTTP request boundary, prior to the normal credential authentication rejection for an unauthenticated `OPTIONS` preflight. It is intentionally not implemented by this foundation library. In the current XRM project, `XrmCredentialCorsMiddleware` is composed first and consumes the existing `KeyHarbor\Service\CredentialServiceCatalog`.
+The implementation belongs at the owning host's HTTP request boundary, prior to the normal credential authentication rejection for an unauthenticated `OPTIONS` preflight. It is intentionally not implemented by this foundation library. In the current XRM project, `XrmCredentialCorsMiddleware` is composed first and consumes the existing `Base3\KeyHarbor\Service\CredentialServiceCatalog`.
 
 XRM obtains the allowlist through the existing deployment configuration,
 not from this Foundation interface. For example, the XRM host uses:

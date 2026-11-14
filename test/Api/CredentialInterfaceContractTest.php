@@ -1,16 +1,31 @@
 <?php declare(strict_types=1);
 
-namespace CredentialFoundation\Test\Api;
+/***********************************************************************
+ * This file is part of CredentialFoundation for BASE3 Framework.
+ *
+ * CredentialFoundation defines reusable credential and encryption contracts.
+ * It supplies DTOs and stateless signing support for BASE3 integrations.
+ * Credential storage and management belong to implementation plugins.
+ *
+ * Developed by Daniel Dahme
+ * Licensed under GPL-3.0
+ * https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * https://base3.de
+ * https://github.com/ddbase3/CredentialFoundation
+ **********************************************************************/
 
-use Base3\Api\IBase;
-use CredentialFoundation\Api\IApiCredentialService;
-use CredentialFoundation\Api\ICredentialAccess;
-use CredentialFoundation\Api\ICredentialOperationAccess;
-use CredentialFoundation\Api\ICredentialServiceProvider;
-use CredentialFoundation\Api\IEncryptionProfileService;
-use CredentialFoundation\Api\IEncryptionTargetProvider;
-use CredentialFoundation\Dto\CredentialAuthenticationResult;
-use CredentialFoundation\Dto\EncryptionKeyMaterial;
+namespace Base3\CredentialFoundation\Test\Api;
+
+use Base3\CoreFoundation\Api\IBase;
+use Base3\CredentialFoundation\Api\IApiCredentialService;
+use Base3\CredentialFoundation\Api\ICredentialAccess;
+use Base3\CredentialFoundation\Api\ICredentialOperationAccess;
+use Base3\CredentialFoundation\Api\ICredentialServiceProvider;
+use Base3\CredentialFoundation\Api\IEncryptionProfileService;
+use Base3\CredentialFoundation\Api\IEncryptionTargetProvider;
+use Base3\CredentialFoundation\Dto\CredentialAuthenticationResult;
+use Base3\CredentialFoundation\Dto\EncryptionKeyMaterial;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 

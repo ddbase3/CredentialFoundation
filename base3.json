@@ -1,7 +1,7 @@
 {
 	"manifestVersion": 1,
 	"name": "CredentialFoundation",
-	"namespace": "CredentialFoundation",
+	"namespace": "Base3\\CredentialFoundation",
 	"version": "4.3.0",
 	"description": "Implementation-neutral API credential and managed encryption contracts for BASE3.",
 	"license": "GPL-3.0-or-later",
@@ -14,6 +14,6 @@
 	],
 	"repository": "https://github.com/ddbase3/CredentialFoundation",
 	"dependencies": {
-		"Base3Framework": ">=4.10.0"
+		"CoreFoundation": ">=4.10.0"
 	}
 }
